@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackathon Idea Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Add Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        /* CSS Variables for Theme */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --secondary-text: #94a3b8;
+            --accent-color: #3b82f6;
+            --button-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --button-text: #ffffff;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --border-color: #334155;
+            --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        }
+
+        /* Light Mode */
+        .light-mode {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --secondary-text: #64748b;
+            --border-color: #e2e8f0;
+            --gradient-bg: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--gradient-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background 0.5s ease, color 0.3s ease;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 45px;
+            height: 45px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: rotate(360deg);
+        }
+
+        /* Glowing Light Bulb Styles */
+        .light-bulb {
+            width: 100%;
+            height: 100%;
+        }
+
+        .bulb-glow {
+            fill: #ffd700; /* Yellow glow */
+            filter: url(#glow);
+            animation: glowPulse 2s infinite ease-in-out;
+        }
+
+        .bulb-base {
+            fill: #00b7eb; /* Blue base */
+        }
+
+        .radiate {
+            stroke: #ffd700;
+            stroke-width: 2;
+            opacity: 0.7;
+            animation: radiatePulse 2s infinite ease-in-out;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% {
+                filter: url(#glow) brightness(1);
+            }
+            50% {
+                filter: url(#glow) brightness(1.5);
+            }
+        }
+
+        @keyframes radiatePulse {
+            0%, 100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--accent-color), #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+            color: var(--accent-color);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            text-align: center;
+            padding: 100px 20px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        .hero-section h2 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-section p {
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            color: var(--secondary-text);
+        }
+
+        .generate-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: transform 0.3s ease, background 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .generate-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Trending Section */
+        .trending-section {
+            max-width: 1400px;
+            margin: 60px auto;
+            padding: 0 20px;
+            animation: fadeIn 2s ease-out;
+        }
+
+        /* Upcoming Hackathons Section */
+        .hackathons-section {
+            max-width: 1400px;
+            margin: 60px auto;
+            padding: 0 20px;
+            animation: fadeIn 2s ease-out;
+        }
+
+        .trending-section h3, .hackathons-section h3 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(90deg, var(--accent-color), #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ideas, .hackathons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .idea-card, .hackathon-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: both;
+            cursor: pointer;
+        }
+
+        .idea-card::before, .hackathon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--button-bg);
+            transition: transform 0.3s ease;
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+
+        .idea-card:hover::before, .hackathon-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .idea-card:hover, .hackathon-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .idea-card h3, .hackathon-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-color);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .description, .hackathon-info {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--secondary-text);
+        }
+
+        .hackathon-info strong {
+            color: var(--text-color);
+        }
+
+        .hackathon-info a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .hackathon-info a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .vote-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vote-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--secondary-text);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+        }
+
+        .vote-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .vote-btn.active-like {
+            color: var(--success-color);
+            background: rgba(52, 199, 89, 0.2);
+        }
+
+        .vote-btn.active-dislike {
+            color: var(--danger-color);
+            background: rgba(255, 59, 48, 0.2);
+        }
+
+        .vote-count {
+            font-size: 14px;
+            color: var(--secondary-text);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: var(--shadow);
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .modal-content p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--secondary-text);
+            margin-bottom: 15px;
+        }
+
+        .modal-content strong {
+            color: var(--text-color);
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--secondary-text);
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .close:hover {
+            color: var(--accent-color);
+            transform: scale(1.2);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+            }
+
+            .logo {
+                width: 35px;
+                height: 35px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .hero-section {
+                padding: 60px 20px;
+            }
+
+            .hero-section h2 {
+                font-size: 32px;
+            }
+
+            .hero-section p {
+                font-size: 16px;
+            }
+
+            .ideas, .hackathons {
+                grid-template-columns: 1fr;
+            }
+
+            .generate-btn {
+                padding: 12px 30px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <header>
+        <div class="header-left">
+            <div class="logo">
+                <svg class="light-bulb" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Glowing Light Bulb Idea Logo">
+                    <!-- Glow Filter -->
+                    <defs>
+                        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <!-- Radiating Lines -->
+                    <line x1="50" y1="10" x2="50" y2="30" class="radiate"/>
+                    <line x1="50" y1="70" x2="50" y2="90" class="radiate"/>
+                    <line x1="10" y1="50" x2="30" y2="50" class="radiate"/>
+                    <line x1="70" y1="50" x2="90" y2="50" class="radiate"/>
+                    <line x1="20" y1="20" x2="30" y2="30" class="radiate"/>
+                    <line x1="70" y1="70" x2="80" y2="80" class="radiate"/>
+                    <line x1="20" y1="80" x2="30" y2="70" class="radiate"/>
+                    <line x1="70" y1="30" x2="80" y2="20" class="radiate"/>
+                    <!-- Bulb Body -->
+                    <path d="M50 20 A 20 20 0 0 1 70 40 A 20 20 0 0 1 50 60 A 20 20 0 0 1 30 40 A 20 20 0 0 1 50 20 Z" class="bulb-glow"/>
+                    <!-- Filament -->
+                    <path d="M45 35 L50 45 L55 35" fill="none" stroke="#ffffff" stroke-width="2"/>
+                    <!-- Base -->
+                    <rect x="40" y="60" width="20" height="10" class="bulb-base"/>
+                    <rect x="45" y="70" width="10" height="5" class="bulb-base"/>
+                </svg>
+            </div>
+            <h1>Hackathon Idea Generator</h1>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+            <i class="fas fa-moon"></i>
+        </button>
+    </header>
+
+    <section class="hero-section">
+        <h2>Unlock Your Next Big Hackathon Idea</h2>
+        <p>Explore trending ideas or generate your own to spark innovation and creativity for your next project!</p>
+        <a href="generate.html" class="generate-btn">Generate Ideas Now</a>
+    </section>
+
+    <section class="trending-section">
+        <h3>Top Trending Ideas</h3>
+        <div id="ideas" class="ideas"></div>
+    </section>
+
+    <section class="hackathons-section">
+        <h3>Upcoming Hackathons in India 2025</h3>
+        <div id="hackathons" class="hackathons"></div>
+    </section>
+
+    <div id="ideaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" aria-label="Close Modal">×</span>
+            <h2 id="modalTitle"></h2>
+            <p id="modalDescription"></p>
+            <p><strong>Category:</strong> <span id="modalCategory"></span></p>
+            <p><strong>Tech/Tools:</strong> <span id="modalTech"></span></p>
+        </div>
+    </div>
+
+    <!-- Add Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        const ideasContainer = document.getElementById('ideas');
+        const hackathonsContainer = document.getElementById('hackathons');
+        const themeToggle = document.getElementById('themeToggle');
+        const ideaModal = document.getElementById('ideaModal');
+        const closeModal = document.querySelector('.close');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDescription = document.getElementById('modalDescription');
+        const modalCategory = document.getElementById('modalCategory');
+        const modalTech = document.getElementById('modalTech');
+
+        // Toast Notification Function
+        function showToast(message, bgColor = '#22c55e') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: 'top',
+                position: 'right',
+                backgroundColor: bgColor,
+            }).showToast();
+        }
+
+        // Sample trending ideas with added details
+        const allTrendingIdeas = [
+            { id: 1, title: "Smart Home Automation Hub", description: "A centralized hub to control smart home devices using IoT and voice commands.", category: "hardware", tech: "Arduino, Raspberry Pi, MQTT" },
+            { id: 2, title: "Fitness Tracker App", description: "A mobile app to track workouts and provide personalized fitness plans using React Native.", category: "software", tech: "React Native, Firebase, HealthKit" },
+            { id: 3, title: "Space Debris Tracker", description: "A system to monitor space debris using Raspberry Pi and real-time data feeds.", category: "hardware", tech: "Raspberry Pi, Python, APIs" },
+            { id: 4, title: "Cultural Heritage AR Experience", description: "An AR app to explore historical sites with immersive storytelling using Unity.", category: "software", tech: "Unity, ARCore, C#" },
+            { id: 5, title: "Smart Irrigation System", description: "An automated irrigation controller using sensors and Arduino for efficient water use.", category: "hardware", tech: "Arduino, Soil Moisture Sensors, ESP8266" },
+            { id: 6, title: "Disaster Alert App", description: "A real-time disaster alert system with push notifications built with Node.js.", category: "software", tech: "Node.js, Express, WebSocket" },
+            { id: 7, title: "Blockchain Voting System", description: "A secure, transparent voting platform using Ethereum smart contracts.", category: "software", tech: "Ethereum, Solidity, Web3.js" },
+            { id: 8, title: "Renewable Energy Monitor", description: "A device to track solar panel efficiency using ESP32 and cloud integration.", category: "hardware", tech: "ESP32, AWS IoT, Sensors" },
+            { id: 9, title: "Smart Education Dashboard", description: "A web app for teachers to manage classes and track student progress with React.", category: "software", tech: "React, Redux, MongoDB" },
+            { id: 10, title: "Robotics Arm Controller", description: "A robotic arm controlled via a mobile app using Arduino and Bluetooth.", category: "hardware", tech: "Arduino, Bluetooth HC-05, Servo Motors" }
+        ];
+
+        // Upcoming Hackathons in India 2025 with Registration Links and Dates
+        const upcomingHackathons = [
+            {
+                title: "Smart India Hackathon 2025",
+                location: "Nationwide (Multiple Nodal Centers)",
+                mode: "In-Person",
+                prizePool: "₹1,00,000 (1st), ₹75,000 (2nd), ₹50,000 (3rd) per center",
+                description: "A nationwide initiative by the Ministry of Education to solve pressing real-world problems.",
+                registrationLink: "https://www.sih.gov.in/",
+                date: "December 10-11, 2025 (Tentative, based on SIH 2024 dates)"
+            },
+            {
+                title: "Hack the Future 2025",
+                location: "IIT Gandhinagar, Gujarat",
+                mode: "In-Person",
+                prizePool: "Not specified (TBD)",
+                description: "Focuses on AI and data science for socio-economic challenges using public data.",
+                registrationLink: "https://iitgn.ac.in/",
+                date: "March 15-16, 2025 (TBD, estimated Q1 2025)"
+            },
+            {
+                title: "KU Hackathon 2025",
+                location: "Kalinga University, Naya Raipur, Chhattisgarh",
+                mode: "In-Person",
+                prizePool: "₹22,500 total",
+                description: "Based on domains like Smart Automation, Green Technology, and Blockchain.",
+                registrationLink: "https://kalingauniversity.ac.in/ku-hackathon-registration/",
+                date: "January 20-21, 2025 (Tentative, registration deadline Jan 10)"
+            },
+            {
+                title: "TechXcelerate 2025",
+                location: "BITS Pilani Hyderabad, Telangana",
+                mode: "In-Person",
+                prizePool: "₹2,50,000 total",
+                description: "Hands-on workshops and hackathon for innovative tech solutions.",
+                registrationLink: "https://www.bits-pilani.ac.in/hyderabad/",
+                date: "February 22-23, 2025 (TBD, estimated Q1 2025)"
+            },
+            {
+                title: "IITM Pravartak Database Engineering Hackathon",
+                location: "Chennai, Tamil Nadu",
+                mode: "In-Person",
+                prizePool: "₹6,00,000 total (₹3,00,000 1st, ₹2,00,000 2nd, ₹1,00,000 3rd)",
+                description: "Challenges participants to solve real-world database engineering problems.",
+                registrationLink: "https://www.hackerearth.com/challenges/hackathon/iitm-pravartak/",
+                date: "April 12-13, 2025 (TBD, estimated Q2 2025)"
+            }
+        ];
+
+        let votes = JSON.parse(localStorage.getItem('votes')) || {};
+        let userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
+
+        // Initialize votes if empty
+        if (!Object.keys(votes).length) {
+            allTrendingIdeas.forEach(idea => votes[idea.id] = Math.floor(Math.random() * 20) - 5);
+            localStorage.setItem('votes', JSON.stringify(votes));
+        }
+        if (!Object.keys(userVotes).length) {
+            allTrendingIdeas.forEach(idea => userVotes[idea.id] = 0);
+            localStorage.setItem('userVotes', JSON.stringify(userVotes));
+        }
+
+        // Render Ideas
+        function renderIdeas(ideas) {
+            ideasContainer.innerHTML = '';
+            ideas.forEach((idea, index) => {
+                const ideaCard = document.createElement('div');
+                ideaCard.className = 'idea-card';
+                ideaCard.style.animationDelay = `${index * 0.1}s`;
+                const currentVotes = votes[idea.id] || 0;
+                const userVote = userVotes[idea.id] || 0;
+                ideaCard.innerHTML = `
+                    <h3>${idea.title}</h3>
+                    <p class="description">${idea.description}</p>
+                    <div class="card-footer">
+                        <div class="vote-section">
+                            <button class="vote-btn like-btn${userVote === 1 ? ' active-like' : ''}" onclick="voteIdea(${idea.id}, 1, event)" aria-label="Like Idea">
+                                <i class="fas fa-thumbs-up"></i>
+                            </button>
+                            <button class="vote-btn dislike-btn${userVote === -1 ? ' active-dislike' : ''}" onclick="voteIdea(${idea.id}, -1, event)" aria-label="Dislike Idea">
+                                <i class="fas fa-thumbs-down"></i>
+                            </button>
+                            <span class="vote-count">Votes: ${currentVotes}</span>
+                        </div>
+                    </div>
+                `;
+                ideaCard.addEventListener('click', (e) => {
+                    if (!e.target.closest('.vote-btn')) {
+                        showIdeaDetails(idea);
+                    }
+                });
+                ideasContainer.appendChild(ideaCard);
+            });
+        }
+
+        // Render Hackathons
+        function renderHackathons() {
+            hackathonsContainer.innerHTML = '';
+            upcomingHackathons.forEach((hackathon, index) => {
+                const hackathonCard = document.createElement('div');
+                hackathonCard.className = 'hackathon-card';
+                hackathonCard.style.animationDelay = `${index * 0.1}s`;
+                hackathonCard.innerHTML = `
+                    <h3>${hackathon.title}</h3>
+                    <p class="hackathon-info">
+                        <strong>Date:</strong> ${hackathon.date}<br>
+                        <strong>Location:</strong> ${hackathon.location}<br>
+                        <strong>Mode:</strong> ${hackathon.mode}<br>
+                        <strong>Prize Pool:</strong> ${hackathon.prizePool}<br>
+                        ${hackathon.description}<br>
+                        <strong>Register:</strong> <a href="${hackathon.registrationLink}" target="_blank">Click Here</a>
+                    </p>
+                `;
+                hackathonsContainer.appendChild(hackathonCard);
+            });
+        }
+
+        // Show Idea Details in Modal
+        function showIdeaDetails(idea) {
+            modalTitle.textContent = idea.title;
+            modalDescription.textContent = idea.description;
+            modalCategory.textContent = idea.category;
+            modalTech.textContent = idea.tech;
+            ideaModal.style.display = 'flex';
+            trapFocus(ideaModal);
+        }
+
+        // Initial Render (Top 10 by votes)
+        const topIdeas = allTrendingIdeas.sort((a, b) => (votes[b.id] || 0) - (votes[a.id] || 0)).slice(0, 10);
+        renderIdeas(topIdeas);
+        renderHackathons();
+
+        // Voting Function
+        window.voteIdea = function(id, voteType, event) {
+            event.stopPropagation(); // Prevent modal from opening when voting
+            const prevVote = userVotes[id] || 0;
+            if (prevVote === voteType) {
+                votes[id] -= voteType;
+                userVotes[id] = 0;
+                showToast('Vote removed!', '#ef4444');
+            } else {
+                votes[id] = (votes[id] || 0) + voteType - prevVote;
+                userVotes[id] = voteType;
+                showToast(prevVote === 0 ? 'Vote recorded!' : 'Vote updated!', '#22c55e');
+            }
+            localStorage.setItem('votes', JSON.stringify(votes));
+            localStorage.setItem('userVotes', JSON.stringify(userVotes));
+            renderIdeas(topIdeas);
+        };
+
+        // Theme Toggle
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            document.body.classList.toggle('light-mode');
+            themeToggle.innerHTML = document.body.classList.contains('dark-mode') ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+        });
+
+        // Parallax Effect
+        window.addEventListener('scroll', () => {
+            const heroBefore = document.querySelector('.hero-section::before');
+            const scrollPosition = window.scrollY;
+            heroBefore.style.transform = `translateY(${scrollPosition * 0.5}px)`;
+        });
+
+        // Modal Close Handlers
+        closeModal.addEventListener('click', () => {
+            ideaModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === ideaModal) {
+                ideaModal.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && ideaModal.style.display === 'flex') {
+                ideaModal.style.display = 'none';
+            }
+        });
+
+        // Trap Focus in Modal
+        function trapFocus(modal) {
+            const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            modal.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) {
+                        if (document.activeElement === firstElement) {
+                            lastElement.focus();
+                            e.preventDefault();
+                        }
+                    } else {
+                        if (document.activeElement === lastElement) {
+                            firstElement.focus();
+                            e.preventDefault();
+                        }
+                    }
+                }
+            });
+            firstElement.focus();
+        }
+    </script>
+</body>
+</html>

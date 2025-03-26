@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackathon Idea Generator - Generate Ideas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Add jsPDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* CSS Variables for Theme */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --secondary-text: #94a3b8;
+            --accent-color: #3b82f6;
+            --button-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --button-text: #ffffff;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --border-color: #334155;
+            --modal-overlay: rgba(0, 0, 0, 0.85);
+            --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            --submit-button-bg: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --export-button-bg: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+
+        /* Light Mode */
+        .light-mode {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --secondary-text: #64748b;
+            --border-color: #e2e8f0;
+            --gradient-bg: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--gradient-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background 0.5s ease, color 0.3s ease;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 45px;
+            height: 45px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: rotate(360deg);
+        }
+
+        /* Glowing Light Bulb Styles */
+        .light-bulb {
+            width: 100%;
+            height: 100%;
+        }
+
+        .bulb-glow {
+            fill: #ffd700; /* Yellow glow */
+            filter: url(#glow);
+            animation: glowPulse 2s infinite ease-in-out;
+        }
+
+        .bulb-base {
+            fill: #00b7eb; /* Blue base */
+        }
+
+        .radiate {
+            stroke: #ffd700;
+            stroke-width: 2;
+            opacity: 0.7;
+            animation: radiatePulse 2s infinite ease-in-out;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% {
+                filter: url(#glow) brightness(1);
+            }
+            50% {
+                filter: url(#glow) brightness(1.5);
+            }
+        }
+
+        @keyframes radiatePulse {
+            0%, 100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--accent-color), #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .light-mode h1 {
+            background: none;
+            -webkit-text-fill-color: #1e293b; /* Black in light mode */
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+            color: var(--accent-color);
+        }
+
+        .language-select {
+            padding: 10px 15px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            appearance: none;
+            background: url('data:image/svg+xml;utf8,<svg fill="%2394a3b8" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+            background-size: 16px;
+        }
+
+        .language-select:hover, .language-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: scale(1.05);
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Input Section */
+        .input-section {
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(30, 41, 59, 0.5));
+            backdrop-filter: blur(5px);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--secondary-text);
+        }
+
+        select {
+            padding: 12px 15px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            appearance: none;
+            background: url('data:image/svg+xml;utf8,<svg fill="%2394a3b8" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+            background-size: 16px;
+        }
+
+        select:hover, select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+
+        /* Ensure dropdown options are readable in both modes */
+        select option {
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        /* Placeholder option (default selected) */
+        select option[disabled][selected] {
+            color: var(--secondary-text);
+        }
+
+        /* Dark mode specific adjustments for dropdown options */
+        .dark-mode select option {
+            background: #1e293b; /* Dark background for options */
+            color: #f1f5f9; /* Light text for readability */
+        }
+
+        /* Light mode specific adjustments for dropdown options */
+        .light-mode select option {
+            background: #ffffff; /* Light background for options */
+            color: #1e293b; /* Dark text for readability */
+        }
+
+        button {
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        #generateBtn, #exportBtn, #submitIdeaBtn {
+            padding: 12px 25px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 50px;
+            border: none;
+            color: var(--button-text);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #generateBtn {
+            background: var(--button-bg);
+        }
+
+        #exportBtn {
+            background: var(--export-button-bg);
+        }
+
+        #submitIdeaBtn {
+            background: var(--submit-button-bg);
+        }
+
+        #generateBtn::before, #exportBtn::before, #submitIdeaBtn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        #generateBtn:hover::before, #exportBtn:hover::before, #submitIdeaBtn:hover::before {
+            left: 100%;
+        }
+
+        #generateBtn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #exportBtn:hover {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #submitIdeaBtn:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #generateBtn:active, #exportBtn:active, #submitIdeaBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Spinner */
+        .spinner {
+            text-align: center;
+            display: none;
+            padding: 20px;
+        }
+
+        .spinner::after {
+            content: '';
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid var(--accent-color);
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Ideas Section */
+        .ideas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .idea-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .idea-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--button-bg);
+            transition: transform 0.3s ease;
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+
+        .idea-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .idea-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .idea-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-color);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .description {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--secondary-text);
+        }
+
+        .tech-info {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: var(--secondary-text);
+        }
+
+        .tech-info strong {
+            color: var(--text-color);
+        }
+
+        .tech-info span {
+            font-family: 'Space Mono', monospace;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 5px;
+            color: var(--accent-color);
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .build-btn {
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .build-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: scale(1.05);
+        }
+
+        .build-btn:active {
+            transform: scale(0.95);
+        }
+
+        .vote-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vote-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--secondary-text);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+        }
+
+        .vote-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .vote-btn.active-like {
+            color: var(--success-color);
+            background: rgba(52, 199, 89, 0.2);
+        }
+
+        .vote-btn.active-dislike {
+            color: var(--danger-color);
+            background: rgba(255, 59, 48, 0.2);
+        }
+
+        .vote-count {
+            font-size: 14px;
+            color: var(--secondary-text);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--secondary-text);
+            font-size: 16px;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-overlay);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            animation: fadeInModal 0.5s ease-in forwards;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .modal-content p {
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            color: var(--secondary-text);
+        }
+
+        .modal-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 25px 0 15px;
+            color: var(--text-color);
+        }
+
+        .modal-content ol {
+            padding-left: 20px;
+        }
+
+        .modal-content li {
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 10px;
+            color: var(--secondary-text);
+        }
+
+        .copy-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: scale(1.05);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--secondary-text);
+            background: rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            transform: rotate(90deg);
+        }
+
+        /* Form Styles for Submit Idea Modal */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--secondary-text);
+            margin-bottom: 8px;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .form-group select {
+            appearance: none;
+            background: url('data:image/svg+xml;utf8,<svg fill="%2394a3b8" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+            background-size: 16px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+            }
+
+            .logo {
+                width: 35px;
+                height: 35px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .input-section {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 20px;
+            }
+
+            .input-group {
+                min-width: 100%;
+            }
+
+            #generateBtn, #exportBtn, #submitIdeaBtn {
+                width: 100%;
+                padding: 12px;
+            }
+
+            .ideas {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <header>
+        <div class="header-left">
+            <div class="logo">
+                <svg class="light-bulb" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Glowing Light Bulb Idea Logo">
+                    <!-- Glow Filter -->
+                    <defs>
+                        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <!-- Radiating Lines -->
+                    <line x1="50" y1="10" x2="50" y2="30" class="radiate"/>
+                    <line x1="50" y1="70" x2="50" y2="90" class="radiate"/>
+                    <line x1="10" y1="50" x2="30" y2="50" class="radiate"/>
+                    <line x1="70" y1="50" x2="90" y2="50" class="radiate"/>
+                    <line x1="20" y1="20" x2="30" y2="30" class="radiate"/>
+                    <line x1="70" y1="70" x2="80" y2="80" class="radiate"/>
+                    <line x1="20" y1="80" x2="30" y2="70" class="radiate"/>
+                    <line x1="70" y1="30" x2="80" y2="20" class="radiate"/>
+                    <!-- Bulb Body -->
+                    <path d="M50 20 A 20 20 0 0 1 70 40 A 20 20 0 0 1 50 60 A 20 20 0 0 1 30 40 A 20 20 0 0 1 50 20 Z" class="bulb-glow"/>
+                    <!-- Filament -->
+                    <path d="M45 35 L50 45 L55 35" fill="none" stroke="#ffffff" stroke-width="2"/>
+                    <!-- Base -->
+                    <rect x="40" y="60" width="20" height="10" class="bulb-base"/>
+                    <rect x="45" y="70" width="10" height="5" class="bulb-base"/>
+                </svg>
+            </div>
+            <h1>Hackathon Idea Generator</h1>
+        </div>
+        <div class="header-right">
+            <a href="index.html" class="back-btn">Back to Home</a>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
+                <i class="fas fa-moon"></i>
+            </button>
+            <select id="language" class="language-select" aria-label="Select Language">
+                <option value="en" selected>English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="input-section">
+            <div class="input-group">
+                <label for="theme">Theme</label>
+                <select id="theme" aria-label="Select Theme">
+                    <option value="" disabled selected>Select Theme</option>
+                    <option value="Smart Automation">Smart Automation</option>
+                    <option value="Fitness & Sports">Fitness & Sports</option>
+                    <option value="Space Technology">Space Technology</option>
+                    <option value="Heritage & Culture">Heritage & Culture</option>
+                    <option value="MedTech/BioTech/HealthTech">MedTech/BioTech/HealthTech</option>
+                    <option value="Agriculture, FoodTech & Rural Development">Agriculture, FoodTech & Rural Development</option>
+                    <option value="Smart Vehicles">Smart Vehicles</option>
+                    <option value="Transportation & Logistics">Transportation & Logistics</option>
+                    <option value="Robotics and Drones">Robotics and Drones</option>
+                    <option value="Clean & Green Technology">Clean & Green Technology</option>
+                    <option value="Tourism">Tourism</option>
+                    <option value="Renewable/Sustainable Energy">Renewable/Sustainable Energy</option>
+                    <option value="Blockchain & Cybersecurity">Blockchain & Cybersecurity</option>
+                    <option value="Smart Education">Smart Education</option>
+                    <option value="Disaster Management">Disaster Management</option>
+                    <option value="Games & Toys">Games & Toys</option>
+                    <option value="Miscellaneous">Miscellaneous</option>
+                    <option value="Fintech">Fintech</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="category">Category</label>
+                <select id="category" aria-label="Select Category">
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="all">All</option>
+                    <option value="hardware">Hardware</option>
+                    <option value="software">Software</option>
+                </select>
+            </div>
+            <button id="generateBtn">Generate Ideas</button>
+            <button id="exportBtn">Export to PDF</button>
+            <button id="submitIdeaBtn">Submit Idea</button>
+        </div>
+
+        <div id="spinner" class="spinner"></div>
+        <div id="ideas" class="ideas"></div>
+
+        <div id="guideModal" class="modal">
+            <div class="modal-content">
+                <span class="close" aria-label="Close Modal">×</span>
+                <h2 id="modalTitle"></h2>
+                <p id="modalOverview"></p>
+                <h3>Steps to Build</h3>
+                <ol id="modalSteps"></ol>
+                <button class="copy-btn" id="copyStepsBtn">Copy Steps</button>
+            </div>
+        </div>
+
+        <div id="submitIdeaModal" class="modal">
+            <div class="modal-content">
+                <span class="close" aria-label="Close Modal">×</span>
+                <h2>Submit Your Idea</h2>
+                <form id="submitIdeaForm">
+                    <div class="form-group">
+                        <label for="ideaTitle">Title</label>
+                        <input type="text" id="ideaTitle" name="title" required placeholder="Enter the title of your idea">
+                    </div>
+                    <div class="form-group">
+                        <label for="ideaDescription">Description</label>
+                        <textarea id="ideaDescription" name="description" required placeholder="Describe your idea"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ideaTheme">Theme</label>
+                        <select id="ideaTheme" name="theme" required>
+                            <option value="" disabled selected>Select Theme</option>
+                            <option value="Smart Automation">Smart Automation</option>
+                            <option value="Fitness & Sports">Fitness & Sports</option>
+                            <option value="Space Technology">Space Technology</option>
+                            <option value="Heritage & Culture">Heritage & Culture</option>
+                            <option value="MedTech/BioTech/HealthTech">MedTech/BioTech/HealthTech</option>
+                            <option value="Agriculture, FoodTech & Rural Development">Agriculture, FoodTech & Rural Development</option>
+                            <option value="Smart Vehicles">Smart Vehicles</option>
+                            <option value="Transportation & Logistics">Transportation & Logistics</option>
+                            <option value="Robotics and Drones">Robotics and Drones</option>
+                            <option value="Clean & Green Technology">Clean & Green Technology</option>
+                            <option value="Tourism">Tourism</option>
+                            <option value="Renewable/Sustainable Energy">Renewable/Sustainable Energy</option>
+                            <option value="Blockchain & Cybersecurity">Blockchain & Cybersecurity</option>
+                            <option value="Smart Education">Smart Education</option>
+                            <option value="Disaster Management">Disaster Management</option>
+                            <option value="Games & Toys">Games & Toys</option>
+                            <option value="Miscellaneous">Miscellaneous</option>
+                            <option value="Fintech">Fintech</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ideaCategory">Category</label>
+                        <select id="ideaCategory" name="category" required>
+                            <option value="" disabled selected>Select Category</option>
+                            <option value="hardware">Hardware</option>
+                            <option value="software">Software</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ideaTech">Tools/Tech Required</label>
+                        <input type="text" id="ideaTech" name="tech" required placeholder="e.g., Arduino, Python, React">
+                    </div>
+                    <button type="submit" class="build-btn">Submit Idea</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const themeInput = document.getElementById('theme');
+        const categoryInput = document.getElementById('category');
+        const languageSelect = document.getElementById('language');
+        const generateBtn = document.getElementById('generateBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const ideasContainer = document.getElementById('ideas');
+        const spinner = document.getElementById('spinner');
+        const guideModal = document.getElementById('guideModal');
+        const closeModal = document.querySelectorAll('.close');
+        const copyStepsBtn = document.getElementById('copyStepsBtn');
+        const submitIdeaBtn = document.getElementById('submitIdeaBtn');
+        const submitIdeaModal = document.getElementById('submitIdeaModal');
+        const submitIdeaForm = document.getElementById('submitIdeaForm');
+
+        // Data Setup
+        const themes = [
+            'Smart Automation', 'Fitness & Sports', 'Space Technology', 'Heritage & Culture',
+            'MedTech/BioTech/HealthTech', 'Agriculture, FoodTech & Rural Development', 'Smart Vehicles',
+            'Transportation & Logistics', 'Robotics and Drones', 'Clean & Green Technology', 'Tourism',
+            'Renewable/Sustainable Energy', 'Blockchain & Cybersecurity', 'Smart Education',
+            'Disaster Management', 'Games & Toys', 'Miscellaneous', 'Fintech'
+        ];
+        const hardwareTech = ['Arduino', 'Raspberry Pi', 'Sensors', 'ESP32', '3D Printer', 'Motors', 'LCD', 'Bluetooth'];
+        const softwareTech = ['JavaScript', 'Python', 'React', 'Node.js', 'Java', 'C++', 'Ruby', 'Swift'];
+
+        const hardwareTitleTemplates = {
+            en: [
+                "Create a {theme} Monitoring Device",
+                "Build a {theme} Automation Kit",
+                "Design a {theme} Safety System",
+                "Develop a {theme} Efficiency Enhancer",
+                "Create a {theme} Data Collector",
+                "Build a {theme} Control Unit",
+                "Design a {theme} Sensor Network",
+                "Develop a {theme} Smart Module",
+                "Create a {theme} IoT Gateway",
+                "Build a {theme} Feedback System"
+            ],
+            es: [
+                "Crear un Dispositivo de Monitoreo para {theme}",
+                "Construir un Kit de Automatización para {theme}",
+                "Diseñar un Sistema de Seguridad para {theme}",
+                "Desarrollar un Mejorador de Eficiencia para {theme}",
+                "Crear un Colector de Datos para {theme}",
+                "Construir una Unidad de Control para {theme}",
+                "Diseñar una Red de Sensores para {theme}",
+                "Desarrollar un Módulo Inteligente para {theme}",
+                "Crear una Puerta de Enlace IoT para {theme}",
+                "Construir un Sistema de Retroalimentación para {theme}"
+            ],
+            fr: [
+                "Créer un Appareil de Surveillance pour {theme}",
+                "Construire un Kit d'Automatisation pour {theme}",
+                "Concevoir un Système de Sécurité pour {theme}",
+                "Développer un Améliorateur d'Efficacité pour {theme}",
+                "Créer un Collecteur de Données pour {theme}",
+                "Construire une Unité de Contrôle pour {theme}",
+                "Concevoir un Réseau de Capteurs pour {theme}",
+                "Développer un Module Intelligent pour {theme}",
+                "Créer une Passerelle IoT pour {theme}",
+                "Construire un Système de Retour pour {theme}"
+            ]
+        };
+
+        const softwareTitleTemplates = {
+            en: [
+                "Build a {theme} Learning Platform",
+                "Create a {theme} Analysis Tool",
+                "Develop a {theme} Management App",
+                "Design a {theme} Collaboration System",
+                "Develop a {theme} Simulation Software",
+                "Create a {theme} Tracking App",
+                "Build a {theme} Recommendation Engine",
+                "Design a {theme} Visualization Dashboard",
+                "Develop a {theme} Automation Tool",
+                "Create a {theme} Feedback Platform",
+                "Build a {theme} Planning App",
+                "Design a {theme} Monitoring System",
+                "Develop a {theme} Prediction Model",
+                "Create a {theme} Community Platform",
+                "Build a {theme} Resource Manager",
+                "Design a {theme} Alert System",
+                "Develop a {theme} Training App",
+                "Create a {theme} Reporting Tool",
+                "Build a {theme} Optimization Software",
+                "Design a {theme} Engagement Platform"
+            ],
+            es: [
+                "Construir una Plataforma de Aprendizaje para {theme}",
+                "Crear una Herramienta de Análisis para {theme}",
+                "Desarrollar una App de Gestión para {theme}",
+                "Diseñar un Sistema de Colaboración para {theme}",
+                "Desarrollar un Software de Simulación para {theme}",
+                "Crear una App de Seguimiento para {theme}",
+                "Construir un Motor de Recomendación para {theme}",
+                "Diseñar un Panel de Visualización para {theme}",
+                "Desarrollar una Herramienta de Automatización para {theme}",
+                "Crear una Plataforma de Retroalimentación para {theme}",
+                "Construir una App de Planificación para {theme}",
+                "Diseñar un Sistema de Monitoreo para {theme}",
+                "Desarrollar un Modelo de Predicción para {theme}",
+                "Crear una Plataforma Comunitaria para {theme}",
+                "Construir un Gestor de Recursos para {theme}",
+                "Diseñar un Sistema de Alertas para {theme}",
+                "Desarrollar una App de Entrenamiento para {theme}",
+                "Crear una Herramienta de Reportes para {theme}",
+                "Construir un Software de Optimización para {theme}",
+                "Diseñar una Plataforma de Participación para {theme}"
+            ],
+            fr: [
+                "Construire une Plateforme d'Apprentissage pour {theme}",
+                "Créer un Outil d'Analyse pour {theme}",
+                "Développer une Application de Gestion pour {theme}",
+                "Concevoir un Système de Collaboration pour {theme}",
+                "Développer un Logiciel de Simulation pour {theme}",
+                "Créer une Application de Suivi pour {theme}",
+                "Construire un Moteur de Recommandation pour {theme}",
+                "Concevoir un Tableau de Bord de Visualisation pour {theme}",
+                "Développer un Outil d'Automatisation pour {theme}",
+                "Créer une Plateforme de Retour pour {theme}",
+                "Construire une Application de Planification pour {theme}",
+                "Concevoir un Système de Surveillance pour {theme}",
+                "Développer un Modèle de Prédiction pour {theme}",
+                "Créer une Plateforme Communautaire pour {theme}",
+                "Construire un Gestionnaire de Ressources pour {theme}",
+                "Concevoir un Système d'Alerte pour {theme}",
+                "Développer une Application de Formation pour {theme}",
+                "Créer un Outil de Rapport pour {theme}",
+                "Construire un Logiciel d'Optimisation pour {theme}",
+                "Concevoir une Plateforme d'Engagement pour {theme}"
+            ]
+        };
+
+        const descriptions = {
+            hardware: {
+                en: "A hardware solution for {theme} built with {tech} to monitor and automate tasks efficiently, designed for real-time data processing and integration with IoT systems.",
+                es: "Una solución de hardware para {theme} construida con {tech} para monitorear y automatizar tareas eficientemente, diseñada para el procesamiento de datos en tiempo real y la integración con sistemas IoT.",
+                fr: "Une solution matérielle pour {theme} construite avec {tech} pour surveiller et automatiser les tâches efficacement, conçue pour le traitement de données en temps réel et l'intégration avec les systèmes IoT."
+            },
+            software: {
+                en: "A software solution for {theme} built with {tech} to {description}, providing insights through visualizations and predictive analytics.",
+                es: "Una solución de software para {theme} construida con {tech} para {description}, proporcionando información a través de visualizaciones y análisis predictivo.",
+                fr: "Une solution logicielle pour {theme} construite avec {tech} pour {description}, fournissant des informations grâce à des visualisations et des analyses prédictives."
+            }
+        };
+
+        const softwareDescriptions = {
+            en: [
+                "facilitate learning, offering interactive modules, quizzes, and progress tracking",
+                "analyze data trends, providing insights through visualizations and predictive analytics",
+                "manage resources efficiently, includes features like real-time tracking, automated reporting, and user-friendly dashboards",
+                "enhance productivity and user experience, featuring intuitive interfaces and robust backend support",
+                "simulate real-world scenarios, offering interactive and educational experiences",
+                "track user activities, providing real-time updates and notifications",
+                "offer personalized suggestions, improving user engagement and satisfaction",
+                "visualize data trends, offering insights through interactive charts and graphs",
+                "automatize repetitive tasks, improving efficiency and reducing manual effort",
+                "gather user feedback, enabling continuous improvement and user satisfaction",
+                "plan and schedule tasks, ensuring timely completion and resource allocation",
+                "monitor activities in real-time, providing alerts and updates",
+                "predict future trends, using machine learning algorithms for accurate forecasting",
+                "connect users, fostering collaboration and knowledge sharing",
+                "manage resources efficiently, ensuring optimal utilization and tracking",
+                "send timely alerts, ensuring quick response to critical events",
+                "offer training modules, improving skills and knowledge",
+                "generate detailed reports, providing insights for decision-making",
+                "optimize processes, reducing costs and improving efficiency",
+                "engage users, offering interactive features and gamification"
+            ],
+            es: [
+                "facilitar el aprendizaje, ofreciendo módulos interactivos, cuestionarios y seguimiento del progreso",
+                "analizar tendencias de datos, proporcionando información a través de visualizaciones y análisis predictivo",
+                "gestionar recursos eficientemente, incluye funciones como seguimiento en tiempo real, informes automatizados y paneles fáciles de usar",
+                "mejorar la productividad y la experiencia del usuario, con interfaces intuitivas y soporte robusto en el backend",
+                "simular escenarios del mundo real, ofreciendo experiencias interactivas y educativas",
+                "rastrear actividades de los usuarios, proporcionando actualizaciones y notificaciones en tiempo real",
+                "ofrecer sugerencias personalizadas, mejorando la participación y la satisfacción del usuario",
+                "visualizar tendencias de datos, ofreciendo información a través de gráficos y diagramas interactivos",
+                "automatizar tareas repetitivas, mejorando la eficiencia y reduciendo el esfuerzo manual",
+                "recopilar retroalimentación de los usuarios, permitiendo mejoras continuas y satisfacción del usuario",
+                "planificar y programar tareas, asegurando la finalización oportuna y la asignación de recursos",
+                "monitorear actividades en tiempo real, proporcionando alertas y actualizaciones",
+                "predecir tendencias futuras, utilizando algoritmos de aprendizaje automático para pronósticos precisos",
+                "conectar a los usuarios, fomentando la colaboración y el intercambio de conocimientos",
+                "gestionar recursos eficientemente, asegurando una utilización y seguimiento óptimos",
+                "enviar alertas oportunas, asegurando una respuesta rápida a eventos críticos",
+                "ofrecer módulos de capacitación, mejorando habilidades y conocimientos",
+                "generar informes detallados, proporcionando información para la toma de decisiones",
+                "optimizar procesos, reduciendo costos y mejorando la eficiencia",
+                "involucrar a los usuarios, ofreciendo funciones interactivas y gamificación"
+            ],
+            fr: [
+                "faciliter l'apprentissage, en proposant des modules interactifs, des quiz et un suivi de la progression",
+                "analyser les tendances des données, en fournissant des informations grâce à des visualisations et des analyses prédictives",
+                "gérer les ressources efficacement, inclut des fonctionnalités comme le suivi en temps réel, les rapports automatisés et des tableaux de bord conviviaux",
+                "améliorer la productivité et l'expérience utilisateur, avec des interfaces intuitives et un support backend robuste",
+                "simuler des scénarios réels, offrant des expériences interactives et éducatives",
+                "suivre les activités des utilisateurs, en fournissant des mises à jour et des notifications en temps réel",
+                "offrir des suggestions personnalisées, améliorant l'engagement et la satisfaction des utilisateurs",
+                "visualiser les tendances des données, en offrant des informations grâce à des graphiques et diagrammes interactifs",
+                "automatiser les tâches répétitives, améliorant l'efficacité et réduisant l'effort manuel",
+                "recueillir les commentaires des utilisateurs, permettant une amélioration continue et la satisfaction des utilisateurs",
+                "planifier et programmer des tâches, assurant un achèvement rapide et une allocation des ressources",
+                "surveiller les activités en temps réel, en fournissant des alertas et des mises à jour",
+                "prédire les tendances futures, en utilisant des algorithmes d'apprentissage automatique pour des prévisions précises",
+                "connecter les utilisateurs, favorisant la collaboration et le partage de connaissances",
+                "gérer les ressources efficacement, assurant une utilisation et un suivi optimaux",
+                "envoyer des alertes opportunes, assurant une réponse rapide aux événements critiques",
+                "proposer des modules de formation, améliorant les compétences et les connaissances",
+                "générer des rapports détaillés, fournissant des informations pour la prise de décision",
+                "optimiser les processus, réduisant les coûts et améliorant l'efficacité",
+                "engager les utilisateurs, en offrant des fonctionnalités interactives et de la gamification"
+            ]
+        };
+
+        // Generate Ideas with Detailed Guides
+        function generateAllIdeas() {
+            const allIdeas = [];
+            let id = 1;
+            for (let theme of themes) {
+                for (let lang of ['en', 'es', 'fr']) {
+                    // Generate 10 hardware ideas per theme
+                    const hardwareTitles = hardwareTitleTemplates[lang];
+                    for (let i = 0; i < 10; i++) {
+                        const tech = hardwareTech[Math.floor(Math.random() * hardwareTech.length)];
+                        const titleTemplate = hardwareTitles[i % hardwareTitles.length];
+                        const title = titleTemplate.replace('{theme}', theme);
+                        const descTemplate = descriptions.hardware[lang];
+                        const description = descTemplate
+                            .replace('{theme}', theme)
+                            .replace('{tech}', tech);
+                        const idea = {
+                            id: id++,
+                            title: title,
+                            description: description,
+                            tech: tech,
+                            theme: theme,
+                            category: 'hardware',
+                            lang: lang,
+                            guide: {
+                                overview: `This is a hardware project for ${theme} using ${tech}, aimed at solving real-world challenges with innovative technology.`,
+                                steps: [
+                                    `Acquire the necessary hardware components like ${tech} and related sensors.`,
+                                    `Set up your development environment (e.g., Arduino IDE for ${tech}).`,
+                                    `Design the circuit layout and connect components securely.`,
+                                    `Write firmware to handle data collection and automation logic.`,
+                                    `Test the device in a controlled environment, ensuring accuracy and reliability.`,
+                                    `Integrate with an IoT platform for remote monitoring if applicable.`,
+                                    `Document your setup and share it with the hackathon community.`
+                                ]
+                            }
+                        };
+                        allIdeas.push(idea);
+                    }
+
+                    // Generate 20 software ideas per theme
+                    const softwareTitles = softwareTitleTemplates[lang];
+                    for (let i = 0; i < 20; i++) {
+                        const tech = softwareTech[Math.floor(Math.random() * softwareTech.length)];
+                        const titleTemplate = softwareTitles[i % softwareTitles.length];
+                        const title = titleTemplate.replace('{theme}', theme);
+                        const descTemplate = descriptions.software[lang];
+                        const description = descTemplate
+                            .replace('{theme}', theme)
+                            .replace('{tech}', tech)
+                            .replace('{description}', softwareDescriptions[lang][i]);
+                        const idea = {
+                            id: id++,
+                            title: title,
+                            description: description,
+                            tech: tech,
+                            theme: theme,
+                            category: 'software',
+                            lang: lang,
+                            guide: {
+                                overview: `This is a software project for ${theme} using ${tech}, aimed at enhancing user experience and productivity.`,
+                                steps: [
+                                    `Set up your development environment with ${tech} (e.g., install Node.js for React).`,
+                                    `Create a project structure using a framework compatible with ${tech}.`,
+                                    `Design the user interface with a focus on usability and responsiveness.`,
+                                    `Implement backend logic to handle data processing and user interactions.`,
+                                    `Test the app across different devices and browsers for compatibility.`,
+                                    `Deploy the app on a hosting platform (e.g., Netlify or Heroku).`,
+                                    `Gather user feedback and iterate on the design for improvements.`
+                                ]
+                            }
+                        };
+                        allIdeas.push(idea);
+                    }
+                }
+            }
+            return allIdeas;
+        }
+
+        let allIdeas = generateAllIdeas();
+        let votes = JSON.parse(localStorage.getItem('votes')) || {};
+        let userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
+
+        // Load user-submitted ideas from localStorage and append to allIdeas
+        const userSubmittedIdeas = JSON.parse(localStorage.getItem('userSubmittedIdeas')) || [];
+        const maxPreGeneratedId = Math.max(...allIdeas.map(idea => idea.id));
+        userSubmittedIdeas.forEach((idea, index) => {
+            idea.id = maxPreGeneratedId + index + 1; // Ensure unique IDs
+            allIdeas.push(idea);
+        });
+
+        // Initialize votes for all ideas (including user-submitted)
+        if (!Object.keys(votes).length) {
+            allIdeas.forEach(idea => votes[idea.id] = 0);
+            localStorage.setItem('votes', JSON.stringify(votes));
+        }
+        if (!Object.keys(userVotes).length) {
+            allIdeas.forEach(idea => userVotes[idea.id] = 0);
+            localStorage.setItem('userVotes', JSON.stringify(userVotes));
+        }
+
+        // Generate Button Handler
+        generateBtn.addEventListener('click', () => {
+            const theme = themeInput.value;
+            const category = categoryInput.value;
+            const language = languageSelect.value;
+
+            if (!theme || !category || !language) {
+                alert('Please select a theme, category, and language!');
+                return;
+            }
+
+            spinner.style.display = 'block';
+            ideasContainer.style.display = 'none';
+            ideasContainer.innerHTML = ''; // Clear previous ideas
+
+            setTimeout(() => {
+                let filteredIdeas;
+                if (category === 'all') {
+                    // Show all ideas (both hardware and software) for the selected theme and language
+                    filteredIdeas = allIdeas.filter(idea =>
+                        idea.theme === theme &&
+                        idea.lang === language
+                    );
+                } else {
+                    // Filter by specific category
+                    filteredIdeas = allIdeas.filter(idea =>
+                        idea.theme === theme &&
+                        idea.category === category &&
+                        idea.lang === language
+                    );
+                }
+
+                // Sort ideas by votes
+                filteredIdeas.sort((a, b) => (votes[b.id] || 0) - (votes[a.id] || 0));
+
+                if (filteredIdeas.length === 0) {
+                    ideasContainer.innerHTML = '<p class="empty-state">No ideas available for this combination!</p>';
+                    ideasContainer.style.display = 'block';
+                } else {
+                    renderIdeas(filteredIdeas);
+                    ideasContainer.style.display = 'grid';
+                }
+                spinner.style.display = 'none';
+            }, 1000);
+        });
+
+        // Export to PDF Handler
+        exportBtn.addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const ideas = document.querySelectorAll('.idea-card');
+            if (ideas.length === 0) {
+                alert('Generate some ideas first!');
+                return;
+            }
+            let y = 10;
+            doc.setFontSize(16);
+            doc.text('Hackathon Ideas', 10, y);
+            y += 10;
+            doc.setFontSize(12);
+            ideas.forEach((idea, index) => {
+                const title = idea.querySelector('h3').textContent;
+                const desc = idea.querySelector('.description').textContent;
+                const tech = idea.querySelector('.tech-info').textContent;
+                doc.text(`${index + 1}. ${title}`, 10, y);
+                doc.text(desc, 10, y + 5, { maxWidth: 180 });
+                doc.text(tech, 10, y + 15);
+                y += 25;
+                if (y > 270) {
+                    doc.addPage();
+                    y = 10;
+                }
+            });
+            doc.save('hackathon-ideas.pdf');
+        });
+
+        // Theme Toggle
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            document.body.classList.toggle('light-mode');
+            themeToggle.innerHTML = document.body.classList.contains('dark-mode') ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+        });
+
+        // Submit Idea Button Handler
+        submitIdeaBtn.addEventListener('click', () => {
+            submitIdeaModal.style.display = 'flex';
+            trapFocus(submitIdeaModal);
+        });
+
+        // Handle Idea Submission
+        submitIdeaForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('ideaTitle').value;
+            const description = document.getElementById('ideaDescription').value;
+            const theme = document.getElementById('ideaTheme').value;
+            const category = document.getElementById('ideaCategory').value;
+            const tech = document.getElementById('ideaTech').value;
+            const lang = languageSelect.value;
+
+            const newIdea = {
+                id: Math.max(...allIdeas.map(idea => idea.id)) + 1,
+                title: title,
+                description: description,
+                tech: tech,
+                theme: theme,
+                category: category,
+                lang: lang,
+                guide: {
+                    overview: `This is a user-submitted ${category} project for ${theme} using ${tech}.`,
+                    steps: [
+                        "Review the idea description and required tools.",
+                        "Plan your project based on the provided details.",
+                        "Gather the necessary tools and resources.",
+                        "Implement the idea following best practices.",
+                        "Test and iterate based on feedback."
+                    ]
+                }
+            };
+
+            // Add to allIdeas
+            allIdeas.push(newIdea);
+
+            // Update user-submitted ideas in localStorage
+            userSubmittedIdeas.push(newIdea);
+            localStorage.setItem('userSubmittedIdeas', JSON.stringify(userSubmittedIdeas));
+
+            // Update votes
+            votes[newIdea.id] = 0;
+            userVotes[newIdea.id] = 0;
+            localStorage.setItem('votes', JSON.stringify(votes));
+            localStorage.setItem('userVotes', JSON.stringify(userVotes));
+
+            alert('Idea submitted successfully!');
+            submitIdeaModal.style.display = 'none';
+            submitIdeaForm.reset();
+        });
+
+        // Render Ideas
+        function renderIdeas(ideas) {
+            ideasContainer.innerHTML = '';
+            ideas.forEach((idea, index) => {
+                const ideaCard = document.createElement('div');
+                ideaCard.className = 'idea-card';
+                ideaCard.style.animationDelay = `${index * 0.1}s`;
+                const currentVotes = votes[idea.id] || 0;
+                const userVote = userVotes[idea.id] || 0;
+                ideaCard.innerHTML = `
+                    <h3>${idea.title}</h3>
+                    <p class="description">${idea.description}</p>
+                    <p class="tech-info"><strong>Tech Required:</strong> <span>${idea.tech}</span></p>
+                    <div class="card-footer">
+                        <button class="build-btn" onclick="showGuide(${idea.id})">Get Build Steps</button>
+                        <div class="vote-section">
+                            <button class="vote-btn like-btn${userVote === 1 ? ' active-like' : ''}" onclick="voteIdea(${idea.id}, 1)" aria-label="Like Idea">
+                                <i class="fas fa-thumbs-up"></i>
+                            </button>
+                            <button class="vote-btn dislike-btn${userVote === -1 ? ' active-dislike' : ''}" onclick="voteIdea(${idea.id}, -1)" aria-label="Dislike Idea">
+                                <i class="fas fa-thumbs-down"></i>
+                            </button>
+                            <span class="vote-count">Votes: ${currentVotes}</span>
+                        </div>
+                    </div>
+                `;
+                ideasContainer.appendChild(ideaCard);
+            });
+        }
+
+        // Voting Function
+        window.voteIdea = function(id, voteType) {
+            const prevVote = userVotes[id] || 0;
+            if (prevVote === voteType) {
+                votes[id] -= voteType;
+                userVotes[id] = 0;
+            } else {
+                votes[id] = (votes[id] || 0) + voteType - prevVote;
+                userVotes[id] = voteType;
+            }
+            localStorage.setItem('votes', JSON.stringify(votes));
+            localStorage.setItem('userVotes', JSON.stringify(userVotes));
+            const theme = themeInput.value;
+            const category = categoryInput.value;
+            const language = languageSelect.value;
+            let filteredIdeas;
+            if (category === 'all') {
+                filteredIdeas = allIdeas.filter(idea =>
+                    idea.theme === theme &&
+                    idea.lang === language
+                );
+            } else {
+                filteredIdeas = allIdeas.filter(idea =>
+                    idea.theme === theme &&
+                    idea.category === category &&
+                    idea.lang === language
+                );
+            }
+            filteredIdeas.sort((a, b) => (votes[b.id] || 0) - (votes[a.id] || 0));
+            renderIdeas(filteredIdeas);
+        };
+
+        // Show Guide Popup
+        window.showGuide = function(id) {
+            const idea = allIdeas.find(idea => idea.id === id);
+            document.getElementById('modalTitle').textContent = idea.title;
+            document.getElementById('modalOverview').textContent = idea.guide.overview;
+            const stepsList = document.getElementById('modalSteps');
+            stepsList.innerHTML = '';
+            idea.guide.steps.forEach(step => {
+                const li = document.createElement('li');
+                li.textContent = step;
+                stepsList.appendChild(li);
+            });
+            guideModal.style.display = 'flex';
+            trapFocus(guideModal);
+        };
+
+        // Copy Steps to Clipboard
+        copyStepsBtn.addEventListener('click', () => {
+            const steps = document.getElementById('modalSteps').innerText;
+            navigator.clipboard.writeText(steps).then(() => {
+                alert('Steps copied to clipboard!');
+            });
+        });
+
+        // Trap Focus in Modal
+        function trapFocus(modal) {
+            const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            modal.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) {
+                        if (document.activeElement === firstElement) {
+                            lastElement.focus();
+                            e.preventDefault();
+                        }
+                    } else {
+                        if (document.activeElement === lastElement) {
+                            firstElement.focus();
+                            e.preventDefault();
+                        }
+                    }
+                }
+            });
+            firstElement.focus();
+        }
+
+        // Close Modal
+        closeModal.forEach(btn => {
+            btn.addEventListener('click', () => {
+                guideModal.style.display = 'none';
+                submitIdeaModal.style.display = 'none';
+            });
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === guideModal) {
+                guideModal.style.display = 'none';
+            }
+            if (e.target === submitIdeaModal) {
+                submitIdeaModal.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (guideModal.style.display === 'flex') {
+                    guideModal.style.display = 'none';
+                }
+                if (submitIdeaModal.style.display === 'flex') {
+                    submitIdeaModal.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
